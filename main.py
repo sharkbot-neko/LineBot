@@ -66,6 +66,10 @@ def RECEIVE_MESSAGE(op):
                     line.sendMessage(receiver, '''                                
 基本的なヘルプ
 !help .. ヘルプを表示します。
+!test .. 起動しているかを確認します。
+
+検索のヘルプ
+!lookup .. 実行した人・ユーザーの情報を取得します。
 ''')
                 elif text.lower() == 'getargs':
                     line.sendMessage(receiver, '引数リスト:\n' + '\n'.join(args))
@@ -73,7 +77,7 @@ def RECEIVE_MESSAGE(op):
                 elif text.lower() == 'test':
                     line.sendMessage(receiver, 'しっかり起動しています！')
 
-                elif text.lower() == 'userinfo':
+                elif text.lower() == 'lookup':
                     line.sendMessage(receiver, f'{contact.displayName}さんの情報\nID: {contact.mid}\n作成時刻: {contact.createdTime}')
 
                 else:
