@@ -3,7 +3,8 @@ from linepy import *
 import time
 import dotenv
 import os
-import importlib
+import random
+import sqlite3
 
 dotenv.load_dotenv()
 
@@ -17,6 +18,11 @@ line.log("Timeline Token : " + str(line.tl.channelAccessToken))
 oepoll = OEPoll(line)
 
 cooldown_command = {}
+
+dbname = 'SAVE.db'
+conn = sqlite3.connect(dbname)
+
+cur = conn.cursor()
 
 # Receive messages from OEPoll
 def RECEIVE_MESSAGE(op):
@@ -70,6 +76,9 @@ def RECEIVE_MESSAGE(op):
 
 検索のヘルプ
 !lookup .. 実行した人・ユーザーの情報を取得します。
+
+面白いヘルプ
+!omikuji ..  おみくじを引きます。
 ''')
                 elif text.lower() == 'getargs':
                     line.sendMessage(receiver, '引数リスト:\n' + '\n'.join(args))
@@ -79,9 +88,21 @@ def RECEIVE_MESSAGE(op):
 
                 elif text.lower() == 'lookup':
                     line.sendMessage(receiver, f'{contact.displayName}さんの情報\nID: {contact.mid}\n作成時刻: {contact.createdTime}')
+                
+                elif text.lower() == 'omikuji':
+                    line.sendMessage(receiver, f'今日の運勢は・・？\n{random.choice(["凶", "吉", "小吉", "大吉", "中吉"])}です！')
 
-                else:
-                    line.sendMessage(receiver, 'コマンドが見つかりません。\n!helpと入力してコマンド名を確認してください。')
+                # elif text.lower() == 'memo_create':
+                #     cur.execute('CREATE TABLE IF NOT EXISTS memo(id TEXT memo TEXT)')
+                #     cur.execute('INSERT OR REPLACE INTO memo(id, memo) values(?, ?)', (str(contact.mid), '\n'.join(args),))
+                #     conn.commit()
+                #     line.sendMessage(receiver, f'メモを作成しました。')
+
+                # elif text.lower() == 'memo':
+                #     cur.execute('CREATE TABLE IF NOT EXISTS memo(id TEXT memo TEXT)')
+                #     conn.commit()
+                #     cur.execute("SELECT id, memo FROM memo WHERE id = ?", (str(contact.mid),))
+                #     data = cur.fetchone()
     except Exception as e:
         line.log("[RECEIVE_MESSAGE] ERROR : " + str(e))
     
