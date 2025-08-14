@@ -77,7 +77,7 @@ def RECEIVE_MESSAGE(op):
 面白い機能のヘルプ
 {prefix}omikuji .. おみくじを引きます。
 
-設定関連のヘルプ
+設定関連のヘルプ (グループオーナーのみ)
 {prefix}change_prefix [頭文字] .. 頭文字を変更します。
 ''')
 
