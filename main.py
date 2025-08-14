@@ -68,14 +68,16 @@ def RECEIVE_MESSAGE(op):
         # ===== コマンド =====
         if name == 'help':
             line.sendMessage(receiver, f'''                                
-基本的なヘルプ
+基本的な機能のヘルプ
 {prefix}help .. ヘルプを表示します。
 {prefix}test .. 起動しているかを確認します。
 {prefix}lookup <mid> .. 実行した人・ユーザーの情報を取得します。
 {prefix}owner .. グループのオーナー情報を見ます。
+
+面白い機能のヘルプ
 {prefix}omikuji .. おみくじを引きます。
 
-設定のヘルプ
+設定関連のヘルプ
 {prefix}change_prefix [頭文字] .. 頭文字を変更します。
 ''')
 
