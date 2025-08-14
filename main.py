@@ -30,11 +30,16 @@ cur = conn.cursor()
 # いろいろ一覧
 commands_ = {}
 
-for cog in os.listdir("commands"):
-    if cog.endswith(".py") and not cog.startswith("__"):
-        mod_name = cog[:-3]
-        imp = importlib.import_module(f"commands.{mod_name}")
-        commands_[imp.name] = imp.run
+def load_commands():
+    commands_.clear()
+    for cog in os.listdir("commands"):
+        if cog.endswith(".py") and not cog.startswith("__"):
+            mod_name = cog[:-3]
+            module = importlib.import_module(f"commands.{mod_name}")
+            importlib.reload(module)
+            commands_[module.name] = module.run
+
+load_commands
 
 def get_prefix(group_id):
     cur.execute("SELECT prefix FROM prefix WHERE group_id = ?", (group_id,))
@@ -77,6 +82,10 @@ def RECEIVE_MESSAGE(op):
         owner_mid = group.creator.mid
 
         # ===== コマンド =====
+
+        if name == "reload":
+            load_commands()
+            line.sendMessage(receiver, "リロードしました。")
 
         ctx_ = ctx.Context(line, receiver, contact, group, sender, owner_mid, prefix, cur, conn)
 
