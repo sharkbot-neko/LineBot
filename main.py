@@ -6,7 +6,7 @@ import os
 import random
 import sqlite3
 from make_db import make_db
-from lib import ctx
+from lib import ctx, db
 import importlib
 
 dotenv.load_dotenv()
@@ -77,92 +77,12 @@ def RECEIVE_MESSAGE(op):
         owner_mid = group.creator.mid
 
         # ===== コマンド =====
-        if name == 'test':
-            line.sendMessage(receiver, 'しっかり起動しています！')
 
-        elif name == 'change_prefix':
-            if sender == owner_mid:
-                if not args:
-                    line.sendMessage(receiver, '頭文字変更の使い方\n!change_prefix [頭文字]')
-                else:
-                    try:
-                        new_prefix = args[0]
-                        cur.execute(
-                            "INSERT OR REPLACE INTO prefix (group_id, prefix) VALUES (?, ?)",
-                            (receiver, new_prefix)
-                        )
-                        conn.commit()
-                        line.sendMessage(receiver, f'頭文字が {new_prefix} に変更されました。')
-                    except Exception as e:
-                        line.sendMessage(receiver, f'エラーが発生しました')
+        ctx_ = ctx.Context(line, receiver, contact, group, sender, owner_mid, prefix, cur, conn)
 
-
-        elif name == 'owner':
-            try:
-                target_contact = line.getContact(owner_mid)
-                display_name = target_contact.displayName
-                mid = target_contact.mid
-                created_time = getattr(target_contact, "createdTime", "不明")
-                status_message = getattr(target_contact, "statusMessage", "なし")
-                picture_url = line.getProfilePictureURL(mid)
-
-                info_text = (
-                    f"{display_name} さんの情報\n"
-                    f"・MID: {mid}\n"
-                    f"・作成時刻: {created_time}\n"
-                    f"・ステータスメッセージ: {status_message}\n"
-                    f"・プロフィール画像: {picture_url}"
-                )
-
-                line.sendMessage(receiver, info_text)
-            except Exception as e:
-                line.sendMessage(receiver, f"詳細情報の取得に失敗しました: {e}")
-
-        elif name == 'lookup':
-            if not args:
-                target_contact = contact
-            else:
-                target = " ".join(args)
-                try:
-                    if target.startswith("u") and len(target) >= 32:
-                        target_contact = line.getContact(target)
-                    else:
-                        group = line.getGroup(receiver)
-                        found = [m for m in group.members if target in m.displayName]
-                        if not found:
-                            line.sendMessage(receiver, "ユーザーが見つかりません。")
-                            return
-                        target_contact = found[0]
-                except Exception:
-                    line.sendMessage(receiver, f"情報を取得できませんでした")
-                    return
-
-            try:
-                display_name = target_contact.displayName
-                mid = target_contact.mid
-                created_time = getattr(target_contact, "createdTime", "不明")
-                status_message = getattr(target_contact, "statusMessage", "なし")
-                picture_url = line.getProfilePictureURL(mid)
-
-                info_text = (
-                    f"{display_name} さんの情報\n"
-                    f"・MID: {mid}\n"
-                    f"・作成時刻: {created_time}\n"
-                    f"・ステータスメッセージ: {status_message}\n"
-                    f"・プロフィール画像: {picture_url}"
-                )
-
-                line.sendMessage(receiver, info_text)
-            except Exception as e:
-                line.sendMessage(receiver, f"詳細情報の取得に失敗しました")
-
-        else:
-
-            ctx_ = ctx.Context(line, receiver, contact, group, prefix)
-
-            func = commands_.get(name, None)
-            if func:
-                func(ctx_, args)
+        func = commands_.get(name, None)
+        if func:
+            func(ctx_, args)
 
     except Exception as e:
         line.log("[RECEIVE_MESSAGE] ERROR : " + str(e))
