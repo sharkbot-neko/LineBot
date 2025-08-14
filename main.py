@@ -6,6 +6,8 @@ import os
 import random
 import sqlite3
 from make_db import make_db
+from lib import ctx
+import importlib
 
 dotenv.load_dotenv()
 
@@ -24,6 +26,15 @@ make_db()
 dbname = 'SAVE.db'
 conn = sqlite3.connect(dbname)
 cur = conn.cursor()
+
+# いろいろ一覧
+commands_ = {}
+
+for cog in os.listdir("commands"):
+    if cog.endswith(".py") and not cog.startswith("__"):
+        mod_name = cog[:-3]
+        imp = importlib.import_module(f"commands.{mod_name}")
+        commands_[imp.name] = imp.run
 
 def get_prefix(group_id):
     cur.execute("SELECT prefix FROM prefix WHERE group_id = ?", (group_id,))
@@ -66,22 +77,7 @@ def RECEIVE_MESSAGE(op):
         owner_mid = group.creator.mid
 
         # ===== コマンド =====
-        if name == 'help':
-            line.sendMessage(receiver, f'''                                
-基本的な機能のヘルプ
-{prefix}help .. ヘルプを表示します。
-{prefix}test .. 起動しているかを確認します。
-{prefix}lookup <mid> .. 実行した人・ユーザーの情報を取得します。
-{prefix}owner .. グループのオーナー情報を見ます。
-
-面白い機能のヘルプ
-{prefix}omikuji .. おみくじを引きます。
-
-設定関連のヘルプ (グループオーナーのみ)
-{prefix}change_prefix [頭文字] .. 頭文字を変更します。
-''')
-
-        elif name == 'test':
+        if name == 'test':
             line.sendMessage(receiver, 'しっかり起動しています！')
 
         elif name == 'change_prefix':
@@ -160,8 +156,13 @@ def RECEIVE_MESSAGE(op):
             except Exception as e:
                 line.sendMessage(receiver, f"詳細情報の取得に失敗しました")
 
-        elif name == 'omikuji':
-            line.sendMessage(receiver, f'今日の運勢は・・？\n{random.choice(["凶", "吉", "小吉", "大吉", "中吉"])}です！')
+        else:
+
+            ctx_ = ctx.Context(line, receiver, contact, group, prefix)
+
+            func = commands_.get(name, None)
+            if func:
+                func(ctx_, args)
 
     except Exception as e:
         line.log("[RECEIVE_MESSAGE] ERROR : " + str(e))
