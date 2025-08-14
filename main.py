@@ -84,8 +84,9 @@ def RECEIVE_MESSAGE(op):
         # ===== コマンド =====
 
         if name == "reload":
-            load_commands()
-            line.sendMessage(receiver, "リロードしました。")
+            if sender == os.environ.get("bot_owner_mid"):
+                load_commands()
+                line.sendMessage(receiver, "リロードしました。")
 
         ctx_ = ctx.Context(line, receiver, contact, group, sender, owner_mid, prefix, cur, conn)
 
