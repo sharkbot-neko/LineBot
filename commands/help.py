@@ -13,6 +13,12 @@ def run(ctx: Context, args):
 面白い機能のヘルプ
 {ctx.prefix}omikuji .. おみくじを引きます。
 
+モデレーション機能のヘルプ (グループオーナーのみ)
+{ctx.prefix}warn [mid] .. 警告をします。
+{ctx.prefix}warns [mid] .. 警告回数を取得します。
+{ctx.prefix}reset_warn [mid] .. 警告をリセットします。
+
 設定関連のヘルプ (グループオーナーのみ)
 {ctx.prefix}change_prefix [頭文字] .. 頭文字を変更します。
+{ctx.prefix}bad_ward [on/off] .. 禁止ワード発言者を処罰するかを設定します。
 ''')
