@@ -8,6 +8,7 @@ import sqlite3
 from make_db import make_db
 from lib import ctx, db
 import importlib
+from events import events
 
 dotenv.load_dotenv()
 
@@ -39,7 +40,7 @@ def load_commands():
             importlib.reload(module)
             commands_[module.name] = module.run
 
-load_commands
+load_commands()
 
 def get_prefix(group_id):
     cur.execute("SELECT prefix FROM prefix WHERE group_id = ?", (group_id,))
@@ -88,6 +89,11 @@ def RECEIVE_MESSAGE(op):
                 load_commands()
                 line.sendMessage(receiver, "リロードしました。")
 
+        elif name == "load":
+            if sender == os.environ.get("bot_owner_mid"):
+                load_commands()
+                line.sendMessage(receiver, "ロードしました。")
+
         ctx_ = ctx.Context(line, receiver, contact, group, sender, owner_mid, prefix, cur, conn)
 
         func = commands_.get(name, None)
@@ -104,10 +110,11 @@ def NOTIFIED_INVITE_INTO_GROUP(op):
     except Exception as e:
         line.log("[NOTIFIED_INVITE_INTO_GROUP] ERROR : " + str(e))
 
-oepoll.addOpInterruptWithDict({
-    OpType.RECEIVE_MESSAGE: RECEIVE_MESSAGE,
-    OpType.NOTIFIED_INVITE_INTO_GROUP: NOTIFIED_INVITE_INTO_GROUP
-})
+# コマンド登録
+oepoll.addOpInterrupt(OpType.RECEIVE_MESSAGE, RECEIVE_MESSAGE)
+
+# イベント登録
+events.register(oepoll)
 
 while True:
     oepoll.trace()
