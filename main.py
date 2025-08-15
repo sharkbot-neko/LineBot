@@ -56,13 +56,16 @@ def RECEIVE_MESSAGE(op):
     sender = msg._from
 
     try:
+        # メッセージイベント発動
+        events.RECEIVE_MESSAGE.event.run(line, op, cur, conn)
+
+        if sender == line.profile.mid:
+            return
+
         if msg.contentType != 0:
             return
         if msg.toType != 2:
             return
-        
-        # メッセージイベント処理
-        events.RECEIVE_MESSAGE.event.run(line, op)
 
         # メッセージからコマンドに変換
         if not isinstance(text, str):
@@ -100,13 +103,15 @@ def RECEIVE_MESSAGE(op):
                 load_commands()
                 line.sendMessage(receiver, "ロードしました。")
 
-        # コマンド処理
+        else:
 
-        ctx_ = ctx.Context(line, receiver, contact, group, sender, owner_mid, prefix, cur, conn)
+            # コマンド処理
 
-        func = commands_.get(name, None)
-        if func:
-            func(ctx_, args)
+            ctx_ = ctx.Context(line, receiver, contact, group, sender, owner_mid, prefix, cur, conn)
+
+            func = commands_.get(name, None)
+            if func:
+                func(ctx_, args)
 
     except Exception as e:
         line.log("[RECEIVE_MESSAGE] ERROR : " + str(e))

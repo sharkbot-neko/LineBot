@@ -14,5 +14,11 @@ def make_db():
     )
     """)
 
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS badword (
+        group_id TEXT
+    )
+    """)
+
     # 反映
     conn.commit()
