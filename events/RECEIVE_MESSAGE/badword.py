@@ -5,6 +5,8 @@ from files.bad_word import BADWORDS
 from sqlite3 import Cursor, Connection
 import time
 
+from lib.warns import Warns
+
 cooldown = {}
 
 def run(line: LINE, op, cur: Cursor, conn: Connection):
@@ -35,6 +37,8 @@ def run(line: LINE, op, cur: Cursor, conn: Connection):
                     if current_time - last_message_time < 5:
                         return
                     cooldown[cooldown_key] = current_time
+
+                    Warns(cur, conn).add_warn(receiver, sender)
 
                     line.sendMessage(receiver, f'禁止ワードを発言しないでください！')
                     return

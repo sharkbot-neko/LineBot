@@ -20,5 +20,13 @@ def make_db():
     )
     """)
 
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS warns (
+        group_id TEXT,
+        mid TEXT,
+        count TEXT
+    )
+    """)
+
     # 反映
     conn.commit()

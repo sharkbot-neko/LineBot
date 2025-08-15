@@ -6,7 +6,7 @@ def run(ctx: Context, args):
     if ctx.sender == ctx.owner_mid:
         if not args:
             ctx.line.sendMessage(ctx.receiver, '頭文字変更の使い方\n!change_prefix [頭文字]')
-    else:
+            return
         try:
             new_prefix = args[0]
             ctx.cur.execute("INSERT OR REPLACE INTO prefix (group_id, prefix) VALUES (?, ?)", (ctx.receiver, new_prefix))
