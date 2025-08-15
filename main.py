@@ -9,6 +9,7 @@ from make_db import make_db
 from lib import ctx, db
 import importlib
 from events import events
+import events.RECEIVE_MESSAGE.event
 
 dotenv.load_dotenv()
 
@@ -59,6 +60,11 @@ def RECEIVE_MESSAGE(op):
             return
         if msg.toType != 2:
             return
+        
+        # メッセージイベント処理
+        events.RECEIVE_MESSAGE.event.run(line, op)
+
+        # メッセージからコマンドに変換
         if not isinstance(text, str):
             return
         
@@ -82,7 +88,7 @@ def RECEIVE_MESSAGE(op):
         group = line.getGroup(receiver)
         owner_mid = group.creator.mid
 
-        # ===== コマンド =====
+        # 管理者向けコマンド処理
 
         if name == "reload":
             if sender == os.environ.get("bot_owner_mid"):
@@ -94,6 +100,8 @@ def RECEIVE_MESSAGE(op):
                 load_commands()
                 line.sendMessage(receiver, "ロードしました。")
 
+        # コマンド処理
+
         ctx_ = ctx.Context(line, receiver, contact, group, sender, owner_mid, prefix, cur, conn)
 
         func = commands_.get(name, None)
@@ -102,13 +110,6 @@ def RECEIVE_MESSAGE(op):
 
     except Exception as e:
         line.log("[RECEIVE_MESSAGE] ERROR : " + str(e))
-
-def NOTIFIED_INVITE_INTO_GROUP(op):
-    try:
-        group_id=op.param1
-        line.acceptGroupInvitation(group_id)
-    except Exception as e:
-        line.log("[NOTIFIED_INVITE_INTO_GROUP] ERROR : " + str(e))
 
 # コマンド登録
 oepoll.addOpInterrupt(OpType.RECEIVE_MESSAGE, RECEIVE_MESSAGE)
